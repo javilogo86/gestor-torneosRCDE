@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Gestor de Torneos de Fútbol con Firebase</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- FullCalendar v5 -->
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+</head>
+<body class="bg-gray-100 p-4">
+  <div class="max-w-4xl mx-auto">
+    <h1 class="text-2xl font-bold mb-4">Gestor de Torneos de Fútbol</h1>
+
+    <div class="flex space-x-2 mb-4">
+      <input
+        id="nombreTorneo"
+        type="text"
+        placeholder="Nombre del torneo"
+        class="border rounded px-2 py-1 flex-1"
+      />
+      <button onclick="crearTorneo()" class="bg-blue-500 text-white px-4 py-1 rounded">Crear Torneo</button>
+    </div>
+
+    <div id="listaTorneos" class="mb-8"></div>
+
+    <h2 class="text-xl font-semibold mb-2">Calendario de Partidos</h2>
+    <div id="calendario" class="bg-white p-4 rounded shadow"></div>
+  </div>
+
+  <!-- Modal -->
+ <div
+  id="modal"
+  class="fixed inset-0 bg-black bg-opacity-50 hidden justify-center items-center"
+>
+  <div class="bg-white p-4 rounded max-w-lg w-full">
+    <h2 id="modalTitulo" class="text-xl font-bold mb-2"></h2>
+
+    <input id="equipo1" type="text" placeholder="Equipo 1" class="border rounded p-2 w-full mb-2" />
+    <input id="equipo2" type="text" placeholder="Equipo 2" class="border rounded p-2 w-full mb-2" />
+    <input id="fecha" type="datetime-local" class="border rounded p-2 w-full mb-4" />
+
+    <button onclick="agregarPartido()" class="bg-green-500 text-white px-4 py-1 rounded mb-2 w-full">
+      Agregar Partido
+    </button>
+
+    <ul id="listaPartidos" class="space-y-1 mb-2"></ul>
+
+    <div class="flex justify-end space-x-2">
+      <button onclick="cerrarModal()" class="bg-gray-500 text-white px-4 py-1 rounded">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+  <script>
+    // CONFIGURA TU FIREBASE AQUI:
+    const firebaseConfig = {
+       apiKey: "AIzaSyC57RLeniqit5vW638XWk3yHvrkKpNGEvg",
+  authDomain: "gestor-torneos-a24a2.firebaseapp.com",
+  databaseURL: "https://gestor-torneos-a24a2-default-rtdb.europe-west1.firebasedatabase.app/",
+  projectId: "gestor-torneos-a24a2",
+  storageBucket: "gestor-torneos-a24a2.firebasestorage.app",
+  messagingSenderId: "18400125931",
+  appId: "1:18400125931:web:59e50d628edbafe84fefae"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    let torneos = [];
+    let torneoActivo = null;
+    let calendar;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      calendar = new FullCalendar.Calendar(document.getElementById("calendario"), {
+        initialView: "dayGridMonth",
+        locale: "es",
+        firstDay: 1, // semana empieza lunes
+        height: 500,
+        events: []
+      });
+      calendar.render();
+
+      cargarTorneos();
+    });
+
+    // Carga torneos y luego actualiza el calendario con los partidos
+    function cargarTorneos() {
+      db.ref("torneos")
+        .once("value")
+        .then((snapshot) => {
+          torneos = snapshot.val() || [];
+          renderizarTorneos();
+          actualizarEventosCalendario();
+        });
+    }
+
+    function guardarTorneos() {
+      db.ref("torneos").set(torneos);
+    }
+
+    function crearTorneo() {
+      const nombre = document.getElementById("nombreTorneo").value.trim();
+      if (!nombre) return alert("Introduce un nombre válido");
+      torneos.push({ nombre, partidos: [] });
+      guardarTorneos();
+      document.getElementById("nombreTorneo").value = "";
+      renderizarTorneos();
+      actualizarEventosCalendario();
+    }
+
+    function renderizarTorneos() {
+      const contenedor = document.getElementById("listaTorneos");
+      contenedor.innerHTML = "";
+      torneos.forEach((torneo, i) => {
+        const div = document.createElement("div");
+        div.className =
+          "bg-white p-2 rounded shadow mb-2 flex justify-between items-center";
+        div.innerHTML = `
+          <span class="font-semibold">${torneo.nombre}</span>
+          <div class="space-x-2">
+            <button class="bg-blue-500 text-white px-2 py-1 rounded" onclick="abrirModal(${i})">Ver</button>
+            <button class="bg-red-500 text-white px-2 py-1 rounded" onclick="eliminarTorneo(${i})">Eliminar</button>
+          </div>`;
+        contenedor.appendChild(div);
+      });
+    }
+
+    function abrirModal(index) {
+      torneoActivo = index;
+      document.getElementById("modalTitulo").innerText = torneos[index].nombre;
+      document.getElementById("modal").classList.remove("hidden");
+      renderizarPartidos();
+    }
+
+    function cerrarModal() {
+      document.getElementById("modal").classList.add("hidden");
+    }
+
+    function agregarPartido() {
+  const equipo1 = document.getElementById("equipo1").value.trim();
+  const equipo2 = document.getElementById("equipo2").value.trim();
+  const fecha = document.getElementById("fecha").value;
+
+  if (!equipo1 || !equipo2 || !fecha) {
+    alert("Por favor, completa todos los campos.");
+    return;
+  }
+
+  const partido = {
+    equipo1,
+    equipo2,
+    fecha
+  };
+
+  torneos[torneoActivo].partidos.push(partido);
+  guardarTorneos();
+  renderizarPartidos();
+  actualizarEventosCalendario();
+
+  // Limpiar campos
+  document.getElementById("equipo1").value = "";
+  document.getElementById("equipo2").value = "";
+  document.getElementById("fecha").value = "";
+}
+
+
+    function eliminarPartido(index) {
+      torneos[torneoActivo].partidos.splice(index, 1);
+      guardarTorneos();
+      renderizarPartidos();
+      actualizarEventosCalendario();
+    }
+
+    function renderizarPartidos() {
+  const ul = document.getElementById("listaPartidos");
+  ul.innerHTML = "";
+  torneos[torneoActivo].partidos.forEach((p, i) => {
+    const texto = `${new Date(p.fecha).toLocaleString()} - ${p.equipo1} vs ${p.equipo2}`;
+    const li = document.createElement("li");
+    li.className = "flex justify-between items-center";
+    li.innerHTML = `
+      <span>${texto}</span>
+      <button onclick="eliminarPartido(${i})" class="bg-red-400 text-white rounded px-2 py-0.5">Eliminar</button>
+    `;
+    ul.appendChild(li);
+  });
+}
+
+
+    function eliminarTorneo(index) {
+      torneos.splice(index, 1);
+      guardarTorneos();
+      renderizarTorneos();
+      actualizarEventosCalendario();
+    }
+
+    // Actualiza eventos en FullCalendar con partidos de torneos
+    function actualizarEventosCalendario() {
+  calendar.removeAllEvents();
+  torneos.forEach((torneo) => {
+    torneo.partidos.forEach((p) => {
+      if (p.fecha && p.equipo1 && p.equipo2) {
+        calendar.addEvent({
+          title: `${p.equipo1} vs ${p.equipo2} (${torneo.nombre})`,
+          start: p.fecha,
+          allDay: false
+        });
+      }
+    });
+  });
+}
+
+  </script>
+</body>
+</html>
