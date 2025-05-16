@@ -20,60 +20,72 @@
   <div class="max-w-4xl mx-auto">
     <h1 class="text-2xl font-bold mb-4">Gestor de Torneos de Fútbol</h1>
 
-    <div class="flex space-x-2 mb-4">
-      <input
-        id="nombreTorneo"
-        type="text"
-        placeholder="Nombre del torneo"
-        class="border rounded px-2 py-1 flex-1"
-      />
-      <button onclick="crearTorneo()" class="bg-blue-500 text-white px-4 py-1 rounded">Crear Torneo</button>
-    </div>
+    <!-- Botones toggle -->
 
-    <div id="listaTorneos" class="mb-8"></div>
+    <div class="mb-4 space-x-2">
+  <button id="btnVerCalendario" class="bg-blue-600 text-white px-4 py-2 rounded">Ver Calendario</button>
+  <button id="btnVerLista" class="bg-gray-300 text-gray-700 px-4 py-2 rounded">Ver Lista Global</button>
+  <button id="btnVerListaTorneos" class="bg-gray-500 text-gray-700 px-4 py-2 rounded">Ver Lista Torneos</button>
+  <!-- Botón Refrescar añadido -->
+  <button id="btnRefrescar" class="bg-green-600 text-white px-4 py-2 rounded">Refrescar</button>
 
-    <h2 class="text-xl font-semibold mb-2">Calendario de Partidos</h2>
-    <div id="calendario" class="bg-white p-4 rounded shadow"></div>
-  </div>
-
-  <!-- Modal -->
- <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 hidden justify-center items-center">
-  <div class="bg-white p-4 rounded max-w-lg w-full">
-    <h2 id="modalTitulo" class="text-xl font-bold mb-2"></h2>
-
-    <input id="equipo1" type="text" placeholder="Equipo 1" class="border rounded p-2 w-full mb-2" />
-    <input id="equipo2" type="text" placeholder="Equipo 2" class="border rounded p-2 w-full mb-2" />
-    <input id="ubicacion" type="text" placeholder="Ubicación" class="border rounded p-2 w-full mb-2" />
-    <input id="fecha" type="datetime-local" class="border rounded p-2 w-full mb-4" />
-
-    <div class="flex justify-between space-x-2 mb-2">
-      <button onclick="agregarOEditarPartido()" id="botonGuardarPartido" class="bg-green-500 text-white px-4 py-1 rounded w-full">
-        Guardar Partido
-      </button>
-      <button onclick="cancelarEdicion()" id="botonCancelarEdicion" class="hidden bg-yellow-500 text-white px-4 py-1 rounded w-full">
-        Cancelar
-      </button>
-    </div>
-
-    <ul id="listaPartidos" class="space-y-1 mb-2"></ul>
-
-    <div class="flex justify-end">
-      <button onclick="cerrarModal()" class="bg-gray-500 text-white px-4 py-1 rounded">Cerrar</button>
-    </div>
-  </div>
 </div>
 
+<!-- Título Calendario -->
+<h2 id="tituloCalendario" class="text-xl font-semibold mb-2 hidden">Calendario de Partidos</h2>
+<div id="calendario" class="bg-white p-4 rounded shadow mb-8 hidden"></div>
+
+<!-- Título Lista Global -->
+<h2 id="tituloLista" class="text-xl font-semibold mb-2">Lista Global de Partidos</h2>
+<div
+  id="vistaListaPartidos"
+  class="bg-white p-4 rounded shadow max-h-96 overflow-auto"
+></div>
+
+<!-- Título Lista Global -->
+<h2 id="tituloListaTorneos" class="text-xl font-semibold mb-2">Torneos</h2>
+<div
+  id="vistaListaTorneos"
+  class="bg-white p-4 rounded shadow max-h-96 overflow-auto"
+></div>
+
+  <!-- Modal -->
+  <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 hidden justify-center items-center">
+    <div class="bg-white p-4 rounded max-w-lg w-full">
+      <h2 id="modalTitulo" class="text-xl font-bold mb-2"></h2>
+
+      <input id="equipo1" type="text" placeholder="Equipo 1" class="border rounded p-2 w-full mb-2" />
+      <input id="equipo2" type="text" placeholder="Equipo 2" class="border rounded p-2 w-full mb-2" />
+      <input id="ubicacion" type="text" placeholder="Ubicación" class="border rounded p-2 w-full mb-2" />
+      <input id="fecha" type="datetime-local" class="border rounded p-2 w-full mb-4" />
+
+      <div class="flex justify-between space-x-2 mb-2">
+        <button onclick="agregarOEditarPartido()" id="botonGuardarPartido" class="bg-green-500 text-white px-4 py-1 rounded w-full">
+          Guardar Partido
+        </button>
+        <button onclick="cancelarEdicion()" id="botonCancelarEdicion" class="hidden bg-yellow-500 text-white px-4 py-1 rounded w-full">
+          Cancelar
+        </button>
+      </div>
+
+      <ul id="listaPartidos" class="space-y-1 mb-2"></ul>
+
+      <div class="flex justify-end">
+        <button onclick="cerrarModal()" class="bg-gray-500 text-white px-4 py-1 rounded">Cerrar</button>
+      </div>
+    </div>
+  </div>
 
   <script>
     // CONFIGURA TU FIREBASE AQUI:
     const firebaseConfig = {
        apiKey: "AIzaSyC57RLeniqit5vW638XWk3yHvrkKpNGEvg",
-  authDomain: "gestor-torneos-a24a2.firebaseapp.com",
-  databaseURL: "https://gestor-torneos-a24a2-default-rtdb.europe-west1.firebasedatabase.app/",
-  projectId: "gestor-torneos-a24a2",
-  storageBucket: "gestor-torneos-a24a2.firebasestorage.app",
-  messagingSenderId: "18400125931",
-  appId: "1:18400125931:web:59e50d628edbafe84fefae"
+       authDomain: "gestor-torneos-a24a2.firebaseapp.com",
+       databaseURL: "https://gestor-torneos-a24a2-default-rtdb.europe-west1.firebasedatabase.app/",
+       projectId: "gestor-torneos-a24a2",
+       storageBucket: "gestor-torneos-a24a2.firebasestorage.app",
+       messagingSenderId: "18400125931",
+       appId: "1:18400125931:web:59e50d628edbafe84fefae"
     };
 
     firebase.initializeApp(firebaseConfig);
@@ -83,7 +95,6 @@
     let torneoActivo = null;
     let calendar;
     let indiceEdicion = null;  // Si es null, se está agregando un nuevo partido
-
 
     document.addEventListener("DOMContentLoaded", () => {
       calendar = new FullCalendar.Calendar(document.getElementById("calendario"), {
@@ -95,17 +106,79 @@
       });
       calendar.render();
 
-      cargarTorneos();
-    });
+      const btnVerCalendario = document.getElementById("btnVerCalendario");
+  const btnVerLista = document.getElementById("btnVerLista");
+  const btnVerListaTorneos = document.getElementById("btnVerListaTorneos");
+
+  const contCalendario = document.getElementById("calendario");
+  const contLista = document.getElementById("vistaListaPartidos");
+  const contTorneos = document.getElementById("vistaListaTorneos");
+
+  const tituloCalendario = document.getElementById("tituloCalendario");
+  const tituloLista = document.getElementById("tituloLista");
+  const tituloTorneos = document.getElementById("tituloListaTorneos");
+
+  btnVerCalendario.addEventListener("click", () => {
+    contCalendario.classList.remove("hidden");
+    contLista.classList.add("hidden");
+    contTorneos.classList.add("hidden");
+    tituloCalendario.classList.remove("hidden");
+    tituloLista.classList.add("hidden");
+    tituloTorneos.classList.add("hidden");
+  });
+
+  btnVerLista.addEventListener("click", () => {
+    contCalendario.classList.add("hidden");
+    contLista.classList.remove("hidden");
+    contTorneos.classList.add("hidden");
+    tituloCalendario.classList.add("hidden");
+    tituloLista.classList.remove("hidden");
+    tituloTorneos.classList.add("hidden");
+  });
+
+  btnVerListaTorneos.addEventListener("click", () => {
+    contCalendario.classList.add("hidden");
+    contLista.classList.add("hidden");
+    contTorneos.classList.remove("hidden");
+    tituloCalendario.classList.add("hidden");
+    tituloLista.classList.add("hidden");
+    tituloTorneos.classList.remove("hidden");
+  });
+
+  document.getElementById("btnRefrescar").addEventListener("click", () => {
+  cargarTorneos();
+});
+
+
+  // Inicializar datos
+  cargarTorneos();
+});
+
+
 
     // Carga torneos y luego actualiza el calendario con los partidos
     function cargarTorneos() {
       db.ref("torneos")
         .once("value")
         .then((snapshot) => {
-          torneos = snapshot.val() || [];
+          const data = snapshot.val();
+          if (Array.isArray(data)) {
+            torneos = data;
+          } else if (data && typeof data === 'object') {
+            torneos = Object.values(data);
+          } else {
+            torneos = [];
+          }
           renderizarTorneos();
           actualizarEventosCalendario();
+          renderizarListaGlobalPartidos();
+        })
+        .catch((error) => {
+          console.error("Error al cargar torneos:", error);
+          torneos = [];
+          renderizarTorneos();
+          actualizarEventosCalendario();
+          renderizarListaGlobalPartidos();
         });
     }
 
@@ -114,159 +187,260 @@
     }
 
     function crearTorneo() {
-      const nombre = document.getElementById("nombreTorneo").value.trim();
-      if (!nombre) return alert("Introduce un nombre válido");
-      torneos.push({ nombre, partidos: [] });
-      guardarTorneos();
-      document.getElementById("nombreTorneo").value = "";
-      renderizarTorneos();
-      actualizarEventosCalendario();
-    }
+  const input = document.getElementById("nombreTorneo");
+  if (!input) {
+    alert("Input de nombre de torneo no encontrado en el DOM.");
+    return;
+  }
+
+  const nombre = input.value.trim();
+  if (!nombre) return alert("Introduce un nombre válido");
+  
+  torneos.push({ nombre, partidos: [] });
+  guardarTorneos();
+  input.value = "";
+  renderizarTorneos();
+  actualizarEventosCalendario();
+  renderizarListaGlobalPartidos();
+}
+
 
     function renderizarTorneos() {
-      const contenedor = document.getElementById("listaTorneos");
-      contenedor.innerHTML = "";
-      torneos.forEach((torneo, i) => {
-        const div = document.createElement("div");
-        div.className =
-          "bg-white p-2 rounded shadow mb-2 flex justify-between items-center";
-        div.innerHTML = `
-          <span class="font-semibold">${torneo.nombre}</span>
-          <div class="space-x-2">
-            <button class="bg-blue-500 text-white px-2 py-1 rounded" onclick="abrirModal(${i})">Ver</button>
-            <button class="bg-red-500 text-white px-2 py-1 rounded" onclick="eliminarTorneo(${i})">Eliminar</button>
-          </div>`;
-        contenedor.appendChild(div);
-      });
-    }
+  const contenedor = document.getElementById("vistaListaTorneos");
+  contenedor.innerHTML = "";
+
+  // Añadir el input y botón aquí
+  const divFormulario = document.createElement("div");
+  divFormulario.className = "flex space-x-2 mb-4";
+  divFormulario.innerHTML = `
+    <input
+      id="nombreTorneo"
+      type="text"
+      placeholder="Nombre del torneo"
+      class="border rounded px-2 py-1 flex-1"
+    />
+    <button onclick="crearTorneo()" class="bg-blue-500 text-white px-4 py-1 rounded">Crear Torneo</button>
+  `;
+  contenedor.appendChild(divFormulario);
+
+  // Renderiza los torneos
+  if (!Array.isArray(torneos)) return;
+  torneos.forEach((torneo, i) => {
+    const div = document.createElement("div");
+    div.className =
+      "bg-white p-2 rounded shadow mb-2 flex justify-between items-center";
+    div.innerHTML = `
+      <span class="font-semibold">${torneo.nombre}</span>
+      <div class="space-x-2">
+        <button class="bg-blue-500 text-white px-2 py-1 rounded" onclick="abrirModal(${i})">Ver</button>
+        <button class="bg-red-500 text-white px-2 py-1 rounded" onclick="eliminarTorneo(${i})">Eliminar</button>
+      </div>`;
+    contenedor.appendChild(div);
+  });
+}
 
     function abrirModal(index) {
       torneoActivo = index;
-      document.getElementById("modalTitulo").innerText = torneos[index].nombre;
+      document.getElementById("modalTitulo").innerText = torneos[index]?.nombre || "Torneo";
       document.getElementById("modal").classList.remove("hidden");
       renderizarPartidos();
     }
 
     function cerrarModal() {
       document.getElementById("modal").classList.add("hidden");
+      limpiarFormulario();
+      torneoActivo = null;
     }
 
-   function agregarOEditarPartido() {
-  const equipo1 = document.getElementById("equipo1").value.trim();
-  const equipo2 = document.getElementById("equipo2").value.trim();
-  const ubicacion = document.getElementById("ubicacion").value.trim();
-  const fecha = document.getElementById("fecha").value;
+    function agregarOEditarPartido() {
+      const equipo1 = document.getElementById("equipo1").value.trim();
+      const equipo2 = document.getElementById("equipo2").value.trim();
+      const ubicacion = document.getElementById("ubicacion").value.trim();
+      const fecha = document.getElementById("fecha").value;
 
-  if (!equipo1 || !equipo2 || !ubicacion || !fecha) {
-    alert("Completa todos los campos.");
-    return;
-  }
+      if (!equipo1 || !equipo2 || !ubicacion || !fecha) {
+        alert("Completa todos los campos.");
+        return;
+      }
 
-  const partido = { equipo1, equipo2, ubicacion, fecha };
+      const partido = { equipo1, equipo2, ubicacion, fecha };
 
-  if (indiceEdicion !== null) {
-    torneos[torneoActivo].partidos[indiceEdicion] = partido;
-  } else {
-    torneos[torneoActivo].partidos.push(partido);
-  }
+      if (torneoActivo === null || !torneos[torneoActivo]) {
+        alert("No hay torneo activo seleccionado.");
+        return;
+      }
 
-  guardarTorneos();
-  renderizarPartidos();
-  actualizarEventosCalendario();
-  limpiarFormulario();
-}
+      if (!Array.isArray(torneos[torneoActivo].partidos)) {
+        torneos[torneoActivo].partidos = [];
+      }
 
+      if (indiceEdicion !== null) {
+        torneos[torneoActivo].partidos[indiceEdicion] = partido;
+      } else {
+        torneos[torneoActivo].partidos.push(partido);
+      }
+
+      guardarTorneos();
+      renderizarPartidos();
+      actualizarEventosCalendario();
+      renderizarListaGlobalPartidos();
+      limpiarFormulario();
+    }
 
     function eliminarPartido(index) {
+      if (torneoActivo === null || !torneos[torneoActivo]) return;
+      if (!Array.isArray(torneos[torneoActivo].partidos)) return;
+
       torneos[torneoActivo].partidos.splice(index, 1);
       guardarTorneos();
       renderizarPartidos();
       actualizarEventosCalendario();
+      renderizarListaGlobalPartidos();
     }
 
     function renderizarPartidos() {
-  const ul = document.getElementById("listaPartidos");
-  ul.innerHTML = "";
-  torneos[torneoActivo].partidos.forEach((p, i) => {
-    const texto = `${new Date(p.fecha).toLocaleString()} - ${p.equipo1} vs ${p.equipo2} @ ${p.ubicacion}`;
-    const li = document.createElement("li");
-    li.className = "flex justify-between items-center";
-    li.innerHTML = `
-      <span class="text-sm">${texto}</span>
-      <div class="space-x-1">
-        <button onclick="editarPartido(${i})" class="bg-blue-400 text-white rounded px-2 py-0.5">Editar</button>
-        <button onclick="eliminarPartido(${i})" class="bg-red-400 text-white rounded px-2 py-0.5">Eliminar</button>
-      </div>
-    `;
-    ul.appendChild(li);
-  });
-}
+      const ul = document.getElementById("listaPartidos");
+      ul.innerHTML = "";
+      if (torneoActivo === null || !torneos[torneoActivo]) return;
+      if (!Array.isArray(torneos[torneoActivo].partidos)) return;
 
-
+      torneos[torneoActivo].partidos.forEach((p, i) => {
+        const texto = `${new Date(p.fecha).toLocaleString()} - ${p.equipo1} vs ${p.equipo2} @ ${p.ubicacion}`;
+        const li = document.createElement("li");
+        li.className = "flex justify-between items-center";
+        li.innerHTML = `
+          <span class="text-sm">${texto}</span>
+          <div class="space-x-1">
+            <button onclick="editarPartido(${i})" class="bg-blue-400 text-white rounded px-2 py-0.5">Editar</button>
+            <button onclick="eliminarPartido(${i})" class="bg-red-400 text-white rounded px-2 py-0.5">Eliminar</button>
+          </div>
+        `;
+        ul.appendChild(li);
+      });
+    }
 
     function eliminarTorneo(index) {
+      if (!Array.isArray(torneos)) return;
       torneos.splice(index, 1);
       guardarTorneos();
       renderizarTorneos();
       actualizarEventosCalendario();
+      renderizarListaGlobalPartidos();
     }
 
     function limpiarFormulario() {
-  document.getElementById("equipo1").value = "";
-  document.getElementById("equipo2").value = "";
-  document.getElementById("ubicacion").value = "";
-  document.getElementById("fecha").value = "";
-  indiceEdicion = null;
-  document.getElementById("botonGuardarPartido").textContent = "Guardar Partido";
-  document.getElementById("botonCancelarEdicion").classList.add("hidden");
+      document.getElementById("equipo1").value = "";
+      document.getElementById("equipo2").value = "";
+      document.getElementById("ubicacion").value = "";
+      document.getElementById("fecha").value = "";
+      indiceEdicion = null;
+      document.getElementById("botonGuardarPartido").textContent = "Guardar Partido";
+      document.getElementById("botonCancelarEdicion").classList.add("hidden");
+   
 }
-
 function cancelarEdicion() {
   limpiarFormulario();
 }
 
 function editarPartido(i) {
+  if (torneoActivo === null || !torneos[torneoActivo]) return;
+  if (!Array.isArray(torneos[torneoActivo].partidos)) return;
+
   const partido = torneos[torneoActivo].partidos[i];
+  if (!partido) return;
+
   document.getElementById("equipo1").value = partido.equipo1;
   document.getElementById("equipo2").value = partido.equipo2;
   document.getElementById("ubicacion").value = partido.ubicacion;
   document.getElementById("fecha").value = partido.fecha;
   indiceEdicion = i;
+
   document.getElementById("botonGuardarPartido").textContent = "Actualizar Partido";
   document.getElementById("botonCancelarEdicion").classList.remove("hidden");
 }
 
 function actualizarEventosCalendario() {
+  if (!calendar) return;
   calendar.removeAllEvents();
+  if (!Array.isArray(torneos)) return;
+
+  const ahora = new Date();
+
+torneos.forEach((torneo, idx) => {
+  if (!Array.isArray(torneo.partidos)) return;
+
+  torneo.partidos.forEach((partido, i) => {
+    const fechaPartido = new Date(partido.fecha);
+
+    // Comprova que el partit no sigui més d'1h passat
+    if (fechaPartido.getTime() + 15 * 60 * 1000 > ahora.getTime()) {
+      calendar.addEvent({
+        title: `${partido.equipo1} vs ${partido.equipo2}`,
+        start: partido.fecha,
+        extendedProps: {
+          ubicacion: partido.ubicacion,
+          torneo: torneo.nombre
+        },
+        allDay: false,
+        id: `${idx}-${i}`
+      });
+    }
+  });
+});
+
+}
+
+function renderizarListaGlobalPartidos() {
+  const contenedor = document.getElementById("vistaListaPartidos");
+  contenedor.innerHTML = "";
+
+  const filtro = document.getElementById("filtroEquipo")?.value?.toLowerCase() || "";
+  const ahora = new Date();
+
+  // Recolectar todos los partidos globales en un array para ordenar
+  let partidosGlobales = [];
+
   torneos.forEach((torneo) => {
-    torneo.partidos.forEach((p) => {
-      if (p.fecha && p.equipo1 && p.equipo2 && p.ubicacion) {
-        calendar.addEvent({
-          title: `${p.equipo1} vs ${p.equipo2} (${torneo.nombre}) @ ${p.ubicacion}`,
-          start: p.fecha,
-          allDay: false
-        });
-      }
+    if (!Array.isArray(torneo.partidos)) return;
+
+    torneo.partidos.forEach((partido) => {
+      const fechaPartido = new Date(partido.fecha);
+
+      // Excluir partidos con más de 1 hora de diferencia hacia el pasado
+      if (fechaPartido.getTime() + 15 * 60 * 1000 < ahora.getTime()) return;
+
+      const equipo1 = partido.equipo1.toLowerCase();
+      const equipo2 = partido.equipo2.toLowerCase();
+
+      if (filtro && !equipo1.includes(filtro) && !equipo2.includes(filtro)) return;
+
+      partidosGlobales.push({
+        torneo: torneo.nombre,
+        partido,
+        fecha: fechaPartido
+      });
     });
+  });
+
+  // Ordenar partidos por fecha ascendente
+  partidosGlobales.sort((a, b) => a.fecha - b.fecha);
+
+  // Renderizar partidos ordenados
+  partidosGlobales.forEach(({ torneo, partido, fecha }) => {
+    const div = document.createElement("div");
+    div.className = "border-b py-2";
+
+    div.innerHTML = `
+      <div class="text-sm font-semibold">${torneo}</div>
+      <div class="text-sm">${fecha.toLocaleString("es-ES")} - ${partido.equipo1} vs ${partido.equipo2} @ ${partido.ubicacion}</div>
+    `;
+
+    contenedor.appendChild(div);
   });
 }
 
-    // Actualiza eventos en FullCalendar con partidos de torneos
-    function actualizarEventosCalendario() {
-  calendar.removeAllEvents();
-  torneos.forEach((torneo) => {
-    torneo.partidos.forEach((p) => {
-      if (p.fecha && p.equipo1 && p.equipo2) {
-        calendar.addEvent({
-          title: `${p.equipo1} vs ${p.equipo2} (${torneo.nombre})`,
-          start: p.fecha,
-          allDay: false
-        });
-      }
-    });
-  });
-}
 
-  </script>
-</body>
+
+</script> 
+</body> 
 </html>
