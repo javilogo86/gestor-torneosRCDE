@@ -15,6 +15,20 @@
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+  <style>
+  .partido {
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+
+  .partido.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+</style>
+
 </head>
 <body class="bg-gray-100 p-4 sm:p-6">
   <div class="max-w-4xl mx-auto w-full">
@@ -22,8 +36,8 @@
 
     <!-- Botones toggle -->
     <div class="mb-4 flex flex-col sm:flex-row sm:space-x-2 space-y-2 sm:space-y-0 justify-center">
+      <button id="btnVerLista" class="bg-gray-300 text-gray-700 px-4 py-3 rounded w-full sm:w-auto">Ver Lista Partidos</button>
       <button id="btnVerCalendario" class="bg-blue-600 text-white px-4 py-3 rounded w-full sm:w-auto">Ver Calendario</button>
-      <button id="btnVerLista" class="bg-gray-300 text-gray-700 px-4 py-3 rounded w-full sm:w-auto">Ver Lista Global</button>
       <button id="btnVerListaTorneos" class="bg-gray-500 text-white px-4 py-3 rounded w-full sm:w-auto">Ver Lista Torneos</button>
       <button id="btnRefrescar" class="bg-green-600 text-white px-4 py-3 rounded w-full sm:w-auto">Refrescar</button>
     </div>
@@ -95,6 +109,8 @@
     let torneoActivo = null;
     let calendar;
     let indiceEdicion = null;  // Si es null, se está agregando un nuevo partido
+    let calendarRendered = false;
+
 
     document.addEventListener("DOMContentLoaded", () => {
       calendar = new FullCalendar.Calendar(document.getElementById("calendario"), {
@@ -227,13 +243,20 @@
   if (!Array.isArray(torneos)) return;
   torneos.forEach((torneo, i) => {
     const div = document.createElement("div");
-    div.className =
-      "bg-white p-2 rounded shadow mb-2 flex justify-between items-center";
+    div.className = "flex justify-between items-center py-2";
     div.innerHTML = `
-      <span class="font-semibold">${torneo.nombre}</span>
-      <div class="space-x-2">
-        <button class="bg-blue-500 text-white px-2 py-1 rounded" onclick="abrirModal(${i})">Ver</button>
-        <button class="bg-red-500 text-white px-2 py-1 rounded" onclick="eliminarTorneo(${i})">Eliminar</button>
+    <span class="text-sm font-semibold">${torneo.nombre}</span>
+      <div class="flex space-x-2">
+        <button onclick="abrirModal(${i})" class="bg-green-400 text-white rounded px-2 py-1 flex items-center justify-center" aria-label="Ver torneo" title="Ver">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </button>
+        <button onclick="eliminarTorneo(${i})" class="bg-red-400 text-white rounded px-2 py-1 flex items-center justify-center" aria-label="Eliminar torneo" title="Eliminar">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
       </div>`;
     contenedor.appendChild(div);
   });
@@ -299,25 +322,34 @@
     }
 
     function renderizarPartidos() {
-      const ul = document.getElementById("listaPartidos");
-      ul.innerHTML = "";
-      if (torneoActivo === null || !torneos[torneoActivo]) return;
-      if (!Array.isArray(torneos[torneoActivo].partidos)) return;
+  const ul = document.getElementById("listaPartidos");
+  ul.innerHTML = "";
+  if (torneoActivo === null || !torneos[torneoActivo]) return;
+  if (!Array.isArray(torneos[torneoActivo].partidos)) return;
 
-      torneos[torneoActivo].partidos.forEach((p, i) => {
-        const texto = `${new Date(p.fecha).toLocaleString()} - ${p.equipo1} vs ${p.equipo2} @ ${p.ubicacion}`;
-        const li = document.createElement("li");
-        li.className = "flex justify-between items-center";
-        li.innerHTML = `
-          <span class="text-sm">${texto}</span>
-          <div class="space-x-1">
-            <button onclick="editarPartido(${i})" class="bg-blue-400 text-white rounded px-2 py-0.5">Editar</button>
-            <button onclick="eliminarPartido(${i})" class="bg-red-400 text-white rounded px-2 py-0.5">Eliminar</button>
-          </div>
-        `;
-        ul.appendChild(li);
-      });
-    }
+  torneos[torneoActivo].partidos.forEach((p, i) => {
+    const texto = `${new Date(p.fecha).toLocaleString()} - ${p.equipo1} vs ${p.equipo2} @ ${p.ubicacion}`;
+    const li = document.createElement("li");
+    li.className = "flex justify-between items-center";
+    li.innerHTML = `
+      <span class="text-sm">${texto}</span>
+      <div class="space-x-1 flex">
+        <button onclick="editarPartido(${i})" class="bg-blue-400 text-white rounded px-2 py-1 flex items-center justify-center" aria-label="Editar partido" title="Editar">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536M9 13l6-6 3 3-6 6H9v-3z" />
+          </svg>
+        </button>
+        <button onclick="eliminarPartido(${i})" class="bg-red-400 text-white rounded px-2 py-1 flex items-center justify-center" aria-label="Eliminar partido" title="Eliminar">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+    `;
+    ul.appendChild(li);
+  });
+}
+
 
     function eliminarTorneo(index) {
       if (!Array.isArray(torneos)) return;
@@ -360,35 +392,38 @@ function editarPartido(i) {
 }
 
 function actualizarEventosCalendario() {
-  if (!calendar) return;
-  calendar.removeAllEvents();
-  if (!Array.isArray(torneos)) return;
+  const eventos = [];
 
-  const ahora = new Date();
+  torneos.forEach((torneo) => {
+    if (!Array.isArray(torneo.partidos)) return;
 
-torneos.forEach((torneo, idx) => {
-  if (!Array.isArray(torneo.partidos)) return;
-
-  torneo.partidos.forEach((partido, i) => {
-    const fechaPartido = new Date(partido.fecha);
-
-    // Comprova que el partit no sigui més d'1h passat
-    if (fechaPartido.getTime() + 15 * 60 * 1000 > ahora.getTime()) {
-      calendar.addEvent({
+    torneo.partidos.forEach((partido) => {
+      eventos.push({
         title: `${partido.equipo1} vs ${partido.equipo2}`,
         start: partido.fecha,
         extendedProps: {
           ubicacion: partido.ubicacion,
           torneo: torneo.nombre
-        },
-        allDay: false,
-        id: `${idx}-${i}`
+        }
       });
-    }
+    });
   });
-});
 
+  if (!calendar) {
+    calendar = new FullCalendar.Calendar(document.getElementById("calendario"), {
+      initialView: "dayGridMonth",
+      locale: "es",
+      firstDay: 1,
+      height: 500,
+      events: eventos
+    });
+    calendar.render();
+  } else {
+    calendar.removeAllEvents();
+    calendar.addEventSource(eventos);
+  }
 }
+
 
 function renderizarListaGlobalPartidos() {
   const contenedor = document.getElementById("vistaListaPartidos");
@@ -397,16 +432,26 @@ function renderizarListaGlobalPartidos() {
   const filtro = document.getElementById("filtroEquipo")?.value?.toLowerCase() || "";
   const ahora = new Date();
 
-  // Recolectar todos los partidos globales en un array para ordenar
+  const colores = [
+    "#FF5733", "#33FF57", "#3357FF", "#FF33A8", "#33FFF5", "#F3FF33", "#A833FF",
+  ];
+
+  const colorPorTorneo = {};
+  let colorIndex = 0;
+
   let partidosGlobales = [];
 
   torneos.forEach((torneo) => {
     if (!Array.isArray(torneo.partidos)) return;
 
+    if (!colorPorTorneo[torneo.nombre]) {
+      colorPorTorneo[torneo.nombre] = colores[colorIndex % colores.length];
+      colorIndex++;
+    }
+
     torneo.partidos.forEach((partido) => {
       const fechaPartido = new Date(partido.fecha);
 
-      // Excluir partidos con más de 1 hora de diferencia hacia el pasado
       if (fechaPartido.getTime() + 15 * 60 * 1000 < ahora.getTime()) return;
 
       const equipo1 = partido.equipo1.toLowerCase();
@@ -417,27 +462,46 @@ function renderizarListaGlobalPartidos() {
       partidosGlobales.push({
         torneo: torneo.nombre,
         partido,
-        fecha: fechaPartido
+        fecha: fechaPartido,
+        color: colorPorTorneo[torneo.nombre],
       });
     });
   });
 
-  // Ordenar partidos por fecha ascendente
   partidosGlobales.sort((a, b) => a.fecha - b.fecha);
 
-  // Renderizar partidos ordenados
-  partidosGlobales.forEach(({ torneo, partido, fecha }) => {
+  partidosGlobales.forEach(({ torneo, partido, fecha, color }, i) => {
     const div = document.createElement("div");
-    div.className = "border-b py-2";
+    div.className = "partido";
+    div.style.backgroundColor = hexToRgba(color, 0.15);
+    div.style.borderLeft = `4px solid ${color}`;
+    div.style.padding = "6px 10px";
+    div.style.marginBottom = "6px";
+    div.style.borderRadius = "4px";
+    div.style.fontSize = "0.85rem";
+    div.style.lineHeight = "1.1rem";
 
     div.innerHTML = `
-      <div class="text-sm font-semibold">${torneo}</div>
-      <div class="text-sm">${fecha.toLocaleString("es-ES")} - ${partido.equipo1} vs ${partido.equipo2} @ ${partido.ubicacion}</div>
+      <div style="color: ${color}; font-weight: 600; margin-bottom: 2px;">${torneo}</div>
+      <div style="color: #333;">${fecha.toLocaleString("es-ES")} - ${partido.equipo1} vs ${partido.equipo2} @ ${partido.ubicacion}</div>
     `;
 
     contenedor.appendChild(div);
+
+    // Animación con pequeño retraso progresivo
+    setTimeout(() => {
+      div.classList.add("visible");
+    }, i * 50); // efecto cascada
   });
+
+  function hexToRgba(hex, alpha = 0.15) {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return `rgba(${r},${g},${b},${alpha})`;
+  }
 }
+
 
 
 
