@@ -16,65 +16,65 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 </head>
-<body class="bg-gray-100 p-4">
-  <div class="max-w-4xl mx-auto">
-    <h1 class="text-2xl font-bold mb-4">Gestor de Torneos de Fútbol</h1>
+<body class="bg-gray-100 p-4 sm:p-6">
+  <div class="max-w-4xl mx-auto w-full">
+    <h1 class="text-2xl sm:text-3xl font-bold mb-4 text-center">Gestor de Torneos de Fútbol</h1>
 
     <!-- Botones toggle -->
+    <div class="mb-4 flex flex-col sm:flex-row sm:space-x-2 space-y-2 sm:space-y-0 justify-center">
+      <button id="btnVerCalendario" class="bg-blue-600 text-white px-4 py-3 rounded w-full sm:w-auto">Ver Calendario</button>
+      <button id="btnVerLista" class="bg-gray-300 text-gray-700 px-4 py-3 rounded w-full sm:w-auto">Ver Lista Global</button>
+      <button id="btnVerListaTorneos" class="bg-gray-500 text-white px-4 py-3 rounded w-full sm:w-auto">Ver Lista Torneos</button>
+      <button id="btnRefrescar" class="bg-green-600 text-white px-4 py-3 rounded w-full sm:w-auto">Refrescar</button>
+    </div>
 
-    <div class="mb-4 space-x-2">
-  <button id="btnVerCalendario" class="bg-blue-600 text-white px-4 py-2 rounded">Ver Calendario</button>
-  <button id="btnVerLista" class="bg-gray-300 text-gray-700 px-4 py-2 rounded">Ver Lista Global</button>
-  <button id="btnVerListaTorneos" class="bg-gray-500 text-gray-700 px-4 py-2 rounded">Ver Lista Torneos</button>
-  <!-- Botón Refrescar añadido -->
-  <button id="btnRefrescar" class="bg-green-600 text-white px-4 py-2 rounded">Refrescar</button>
+    <!-- Título Calendario -->
+    <h2 id="tituloCalendario" class="text-xl sm:text-2xl font-semibold mb-2 hidden text-center">Calendario de Partidos</h2>
+    <div id="calendario" class="bg-white p-4 rounded shadow mb-8 hidden"></div>
 
-</div>
+    <!-- Título Lista Global -->
+    <h2 id="tituloLista" class="text-xl sm:text-2xl font-semibold mb-2 text-center">Lista Global de Partidos</h2>
+    <div
+      id="vistaListaPartidos"
+      class="bg-white p-4 rounded shadow max-h-[24rem] overflow-auto"
+    ></div>
 
-<!-- Título Calendario -->
-<h2 id="tituloCalendario" class="text-xl font-semibold mb-2 hidden">Calendario de Partidos</h2>
-<div id="calendario" class="bg-white p-4 rounded shadow mb-8 hidden"></div>
+    <!-- Título Lista Torneos -->
+    <h2 id="tituloListaTorneos" class="text-xl sm:text-2xl font-semibold mb-2 text-center">Torneos</h2>
+    <div
+      id="vistaListaTorneos"
+      class="bg-white p-4 rounded shadow max-h-[24rem] overflow-auto"
+    ></div>
 
-<!-- Título Lista Global -->
-<h2 id="tituloLista" class="text-xl font-semibold mb-2">Lista Global de Partidos</h2>
-<div
-  id="vistaListaPartidos"
-  class="bg-white p-4 rounded shadow max-h-96 overflow-auto"
-></div>
+    <!-- Modal -->
+    <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex justify-center items-center p-4">
+      <div class="bg-white p-4 rounded max-w-lg w-full max-h-[90vh] overflow-auto">
+        <h2 id="modalTitulo" class="text-xl sm:text-2xl font-bold mb-4 text-center"></h2>
 
-<!-- Título Lista Global -->
-<h2 id="tituloListaTorneos" class="text-xl font-semibold mb-2">Torneos</h2>
-<div
-  id="vistaListaTorneos"
-  class="bg-white p-4 rounded shadow max-h-96 overflow-auto"
-></div>
+        <input id="equipo1" type="text" placeholder="Equipo 1" class="border rounded p-2 w-full mb-2" />
+        <input id="equipo2" type="text" placeholder="Equipo 2" class="border rounded p-2 w-full mb-2" />
+        <input id="ubicacion" type="text" placeholder="Ubicación" class="border rounded p-2 w-full mb-2" />
+        <input id="fecha" type="datetime-local" class="border rounded p-2 w-full mb-4" />
 
-  <!-- Modal -->
-  <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 hidden justify-center items-center">
-    <div class="bg-white p-4 rounded max-w-lg w-full">
-      <h2 id="modalTitulo" class="text-xl font-bold mb-2"></h2>
+        <div class="flex flex-col sm:flex-row justify-between space-y-2 sm:space-y-0 sm:space-x-2 mb-4">
+          <button onclick="agregarOEditarPartido()" id="botonGuardarPartido" class="bg-green-500 text-white px-4 py-3 rounded w-full sm:w-auto">
+            Guardar Partido
+          </button>
+          <button onclick="cancelarEdicion()" id="botonCancelarEdicion" class="hidden bg-yellow-500 text-white px-4 py-3 rounded w-full sm:w-auto">
+            Cancelar
+          </button>
+        </div>
 
-      <input id="equipo1" type="text" placeholder="Equipo 1" class="border rounded p-2 w-full mb-2" />
-      <input id="equipo2" type="text" placeholder="Equipo 2" class="border rounded p-2 w-full mb-2" />
-      <input id="ubicacion" type="text" placeholder="Ubicación" class="border rounded p-2 w-full mb-2" />
-      <input id="fecha" type="datetime-local" class="border rounded p-2 w-full mb-4" />
+        <ul id="listaPartidos" class="space-y-2 mb-4"></ul>
 
-      <div class="flex justify-between space-x-2 mb-2">
-        <button onclick="agregarOEditarPartido()" id="botonGuardarPartido" class="bg-green-500 text-white px-4 py-1 rounded w-full">
-          Guardar Partido
-        </button>
-        <button onclick="cancelarEdicion()" id="botonCancelarEdicion" class="hidden bg-yellow-500 text-white px-4 py-1 rounded w-full">
-          Cancelar
-        </button>
-      </div>
-
-      <ul id="listaPartidos" class="space-y-1 mb-2"></ul>
-
-      <div class="flex justify-end">
-        <button onclick="cerrarModal()" class="bg-gray-500 text-white px-4 py-1 rounded">Cerrar</button>
+        <div class="flex justify-center">
+          <button onclick="cerrarModal()" class="bg-gray-500 text-white px-6 py-2 rounded w-full sm:w-auto">Cerrar</button>
+        </div>
       </div>
     </div>
+
   </div>
+
 
   <script>
     // CONFIGURA TU FIREBASE AQUI:
